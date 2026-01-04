@@ -56,7 +56,11 @@ def authenticate():
                 SCOPES
             )
 
-            auth_url, _ = flow.authorization_url(prompt="consent", access_type="offline")
+            auth_url, _ = flow.authorization_url(
+    prompt="consent",
+    access_type="offline",
+    redirect_uri="https://auth.streamlit.app/callback"
+)
             st.markdown("**Autoritza l'app amb Google:**")
             st.markdown(f"[{auth_url}]({auth_url})")
 
