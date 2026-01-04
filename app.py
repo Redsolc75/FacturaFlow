@@ -20,7 +20,7 @@ SCOPES = [
 
 LABEL_NAME = "Factures"  # Etiqueta de Gmail
 DRIVE_FOLDER_ID = "1jXAN0FrhPu84mwcYIOzmmfdWOt3EwYRA"  # ID carpeta Drive (canvia si vols una altra)
-SHEET_ID = "POSA_EL_TE_ID_DEL_SHEET_AQUI"  # ID del teu Google Sheet d'historial
+SHEET_ID = "1fS6cyXxMgjimNHCykATd8t3uoVTo3TxhEikMkPxrR0w"  # ID del teu Google Sheet d'historial
 
 # ===================== INTERFÍCIE =====================
 st.set_page_config(page_title="FacturaFlow Pro", layout="centered")
