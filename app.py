@@ -19,10 +19,9 @@ SCOPES = [
 ]
 
 LABEL_NAME = "Factures"
-DRIVE_FOLDER_ID = "1jXAN0FrhPu84mwcYIOzmmfdWOt3EwYRA"  # La teva carpeta
-SHEET_ID = "1fS6cyXxMgjimNHCykATd8t3uoVTo3TxhEikMkPxrR0w"  # El teu Sheet ID
+DRIVE_FOLDER_ID = "1jXAN0FrhPu84mwcYIOzmmfdWOt3EwYRA"
+SHEET_ID = "1fS6cyXxMgjimNHCykATd8t3uoVTo3TxhEikMkPxrR0w"  # El teu ID
 
-# ===================== INTERFÍCIE =====================
 st.set_page_config(page_title="FacturaFlow Pro", layout="centered")
 st.markdown("<h1 style='text-align: center; color: #1a73e8;'>FacturaFlow Pro</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; font-style: italic;'>Dades assegurades localment. No perdràs cap revisió.</p>", unsafe_allow_html=True)
@@ -42,25 +41,24 @@ def authenticate():
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_config(
-                {
-                    "web": {
-                        "client_id": st.secrets["CLIENT_ID"],
-                        "client_secret": st.secrets["CLIENT_SECRET"],
-                        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                        "token_uri": "https://oauth2.googleapis.com/token",
-                        "redirect_uris": ["https://auth.streamlit.app/callback"],
-                        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs"
-                    }
-                },
-                SCOPES
-            )
+            # Configuració del flow amb redirect_uri forçat
+            client_config = {
+                "web": {
+                    "client_id": st.secrets["CLIENT_ID"],
+                    "client_secret": st.secrets["CLIENT_SECRET"],
+                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                    "token_uri": "https://oauth2.googleapis.com/token",
+                    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                    "redirect_uris": ["https://auth.streamlit.app/callback"]
+                }
+            }
 
-            # FORÇEM EL REDIRECT_URI A L'URL D'AUTORITZACIÓ
+            flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
+            flow.redirect_uri = "https://auth.streamlit.app/callback"  # FORÇAT AQUÍ
+
             auth_url, _ = flow.authorization_url(
                 prompt="consent",
-                access_type="offline",
-                redirect_uri="https://auth.streamlit.app/callback"  # AQUESTA LÍNIA ÉS LA CLAVE!
+                access_type="offline"
             )
 
             st.markdown("**Autoritza l'app amb Google:**")
@@ -76,12 +74,12 @@ def authenticate():
                     creds = flow.credentials
                     with open(token_path, "wb") as token:
                         pickle.dump(creds, token)
-                    st.success("Connectat correctament a Google! Ara pots processar factures.")
+                    st.success("Connectat correctament a Google!")
                 except Exception as e:
-                    st.error(f"Error amb el codi: {e}")
+                    st.error(f"Error: {e}")
                     st.stop()
             else:
-                st.warning("Cal enganxar el codi per continuar.")
+                st.warning("Cal el codi per continuar.")
                 st.stop()
 
     gmail_service = build("gmail", "v1", credentials=creds)
@@ -112,7 +110,7 @@ with tab1:
 
         st.write(f"Trobats {len(messages)} correus amb factures.")
 
-        with st.spinner("Processant factures..."):
+        with st.spinner("Processant..."):
             historial_rows = []
             for msg in messages:
                 msg_data = gmail_service.users().messages().get(userId="me", id=msg["id"]).execute()
